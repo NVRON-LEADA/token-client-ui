@@ -30,8 +30,6 @@ import HelpCenter from "./pages/resources/HelpCenter";
 import Documentation from "./pages/resources/Documentation";
 import Community from "./pages/resources/Community";
 
-
-
 import "./styles/global.css";
 import Dashboard from "./pages/dashboard";  // import your Dashboard component
 
