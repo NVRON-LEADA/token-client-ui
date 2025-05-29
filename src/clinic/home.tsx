@@ -1,11 +1,11 @@
-import React from 'react';
+// import React from 'react';
 import { Container, Typography, Box, Button, Paper, Divider } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import QueueIcon from '@mui/icons-material/Queue';
-import PersonIcon from '@mui/icons-material/Person';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+// import PersonIcon from '@mui/icons-material/Person';
+// import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 
 const Home = () => {
   return (
