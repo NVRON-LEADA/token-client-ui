@@ -67,7 +67,7 @@ const App = () => {
           <Route path="resources" element={<ResourcesLanding />} />
           <Route path="blog" element={<Blog />} />
           <Route path="help-center" element={<HelpCenter />} />
-          <Route path="docs" element={<Documentation />} />
+          <Route path="resources/docs" element={<Documentation />} />
           <Route path="community" element={<Community />} />
 
           {/* clinics */}
