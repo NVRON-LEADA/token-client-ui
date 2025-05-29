@@ -5,6 +5,7 @@ import SubscriptionPage from "./pages/subscriptionpage";
 import LoginPage from "./components/GoogleLogin";
 import Signup from "./pages/signup";
 import Homepage from "./pages/homepage";
+import Home from "./clinic/home"
 import "./styles/global.css"
 
 
@@ -28,6 +29,8 @@ import Blog from "./pages/resources/Blog";
 import HelpCenter from "./pages/resources/HelpCenter";
 import Documentation from "./pages/resources/Documentation";
 import Community from "./pages/resources/Community";
+
+
 
 import "./styles/global.css";
 import Dashboard from "./pages/dashboard";  // import your Dashboard component
@@ -68,6 +71,9 @@ const App = () => {
           <Route path="help-center" element={<HelpCenter />} />
           <Route path="docs" element={<Documentation />} />
           <Route path="community" element={<Community />} />
+
+          {/* clinics */}
+          <Route path="Home" element={<Home />} />
         </Route>
       </Routes>
     </Router>

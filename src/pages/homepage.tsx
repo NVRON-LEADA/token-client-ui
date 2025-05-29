@@ -9,7 +9,7 @@ const HomePage = () => {
         </p>
         <div className="mt-8">
           <a
-            href="/signup"
+            href="./signup"
             className="inline-block bg-purple-600 hover:bg-purple-700 transition px-6 py-3 rounded-xl font-semibold text-white shadow-lg"
           >
             Get Started
