@@ -16,6 +16,13 @@ import {
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 
+// Define a custom type that supports either navigation or an action
+type MenuItem = {
+  text: string;
+  path?: string;
+  action?: () => void;
+};
+
 const ClinicNav = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -39,8 +46,8 @@ const ClinicNav = () => {
     }
   };
 
-  // Base menu items for all users
-  const menuItems = [
+  // Menu items for the drawer and nav bar
+  const menuItems: MenuItem[] = [
     { text: 'Home', path: '/' },
     { text: 'Get Token', path: '/token' },
   ];
@@ -70,8 +77,8 @@ const ClinicNav = () => {
         <ListItem
           button
           key={item.text}
-          component={item.action ? 'div' : RouterLink}
-          to={item.path}
+          component={item.path ? RouterLink : 'div'}
+          to={item.path || ''}
           onClick={item.action || (() => setDrawerOpen(false))}
         >
           <ListItemText primary={item.text} />
@@ -120,7 +127,7 @@ const ClinicNav = () => {
                   key={item.text}
                   color="inherit"
                   component={RouterLink}
-                  to={item.path}
+                  to={item.path!}
                 >
                   {item.text}
                 </Button>
