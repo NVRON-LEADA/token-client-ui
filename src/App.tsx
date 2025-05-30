@@ -5,7 +5,6 @@ import SubscriptionPage from "./pages/subscriptionpage";
 import LoginPage from "./components/GoogleLogin";
 import Signup from "./pages/signup";
 import Homepage from "./pages/homepage";
-import Home from "./clinic/home";
 import "./styles/global.css";
 
 
@@ -70,8 +69,8 @@ const App = () => {
           <Route path="resources/docs" element={<Documentation />} />
           <Route path="community" element={<Community />} />
 
-          {/* clinics */}
-          <Route path="Home" element={<Home />} />
+          {/* clinics
+          <Route path="Home" element={<Home />} /> */}
         </Route>
       </Routes>
     </Router>
