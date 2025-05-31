@@ -5,11 +5,10 @@ import SubscriptionPage from "./pages/subscriptionpage";
 import LoginPage from "./components/GoogleLogin";
 import Signup from "./pages/signup";
 import Homepage from "./pages/homepage";
+
+import { Navigate } from 'react-router-dom';
 import "./styles/global.css";
-
-import { ThemeProvider, createTheme } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-
+import { roleMap } from './constants/roles';
 
 
 // Feature pages
@@ -40,15 +39,19 @@ import DoctorDashboard from './clinic/pages/DoctorDashboard';
 import ReceptionDashboard from './clinic/pages/ReceptionDashboard';
 import DoctorLogin from './clinic/pages/Login';
 import ReceptionLogin from './clinic/pages/ReceptionLogin';
-import { SubdomainProvider } from './clinic/contexts/SubdomainContext';
-
 
 
 import "./styles/global.css";
 import Dashboard from "./pages/dashboard";  // import your Dashboard component
 
+type ProtectedRouteProps = {
+  children: React.ReactNode;
+  allowedRole: string; // or a union type like 'admin' | 'staff'
+};
 
-const ProtectedRoute = ({ children, allowedRole }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRole }) => { ;
+
+
   // Get token and user info from localStorage
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');

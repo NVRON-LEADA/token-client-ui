@@ -6,6 +6,6 @@
   ],
   "compilerOptions": {
     "verbatimModuleSyntax": true,
-    "importsNotUsedAsValues": "error"
+     "jsx": "react-jsx",
   }
 }

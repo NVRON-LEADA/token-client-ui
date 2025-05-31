@@ -1,4 +1,6 @@
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+import type { ReactNode } from 'react'; // ✅ Type-only import
+
 
 interface SubdomainContextType {
   subdomain: string | null;

@@ -83,18 +83,19 @@ const ClinicNavbar: React.FC = () => {
 
   const drawer = (
     <List>
-      {menuItems.map((item) => (
-        <ListItem
-          button
-          key={item.text}
-          component={item.action ? 'div' : RouterLink}
-          to={item.path || ''}
-          onClick={item.action || (() => setDrawerOpen(false))}
-        >
-          <ListItemText primary={item.text} />
-        </ListItem>
-      ))}
-    </List>
+  {menuItems.map((item) => (
+    <ListItem
+      key={item.text}
+      component={item.action ? 'div' : RouterLink}
+      to={item.path || ''}
+      onClick={item.action || (() => setDrawerOpen(false))}
+      {...(!item.action && { button: true })}
+    >
+      <ListItemText primary={item.text} />
+    </ListItem>
+  ))}
+</List>
+
   );
 
   return (

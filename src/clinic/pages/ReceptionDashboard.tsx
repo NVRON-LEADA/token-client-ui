@@ -30,7 +30,7 @@ import {
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const API_URL = 'https://leada-server.onrender.com';
+const API_URL = 'https://token-api-0z44.onrender.com';
 
 interface Token {
   _id: string;
