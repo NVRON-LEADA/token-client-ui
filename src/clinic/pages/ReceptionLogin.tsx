@@ -1,4 +1,6 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
+
 import {
   Container,
   Typography,
@@ -55,7 +57,7 @@ const ReceptionLogin: React.FC = () => {
 
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      navigate('/reception');
+      navigate('/clinic/reception');
     } catch (error: any) {
       setError(error.response?.data?.message || 'Error logging in');
     } finally {

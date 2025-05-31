@@ -33,8 +33,6 @@ const ClinicNavbar: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
-  const token = localStorage.getItem('token');
-  const isAuthenticated = Boolean(token);
 
   let user: User = {};
   try {
@@ -62,7 +60,7 @@ const ClinicNavbar: React.FC = () => {
     { text: 'Get Token', path: '/clinic/token' },
   ];
 
-  if (isAuthenticated) {
+
     if (user.role === 'doctor') {
       menuItems.push(
         { text: 'Doctor Dashboard', path: '/clinic/doctor' },
@@ -74,12 +72,12 @@ const ClinicNavbar: React.FC = () => {
         { text: 'Logout', action: handleLogout }
       );
     }
-  } else {
+    else {
     menuItems.push(
       { text: 'Doctor Login', path: '/clinic/doctor/login' },
       { text: 'Reception Login', path: '/clinic/reception/login' }
     );
-  }
+    }
 
   const drawer = (
     <List>

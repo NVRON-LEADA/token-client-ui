@@ -1,14 +1,13 @@
-import "./pages/i18n"; 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./pages/i18n";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./pages/layout";
 import SubscriptionPage from "./pages/subscriptionpage";
 import LoginPage from "./components/GoogleLogin";
 import Signup from "./pages/signup";
 import Homepage from "./pages/homepage";
-
-import { Navigate } from 'react-router-dom';
+import Dashboard from "./pages/dashboard"; // Dashboard Component
 import "./styles/global.css";
-import { roleMap } from './constants/roles';
+import type { Role } from './constants/roles';
 
 
 // Feature pages
@@ -32,7 +31,7 @@ import HelpCenter from "./pages/resources/HelpCenter";
 import Documentation from "./pages/resources/Documentation";
 import Community from "./pages/resources/Community";
 
-//Clinic pages
+// Clinic pages
 import Home from './clinic/pages/Home';
 import PatientToken from './clinic/pages/PatientToken';
 import DoctorDashboard from './clinic/pages/DoctorDashboard';
@@ -40,48 +39,33 @@ import ReceptionDashboard from './clinic/pages/ReceptionDashboard';
 import DoctorLogin from './clinic/pages/Login';
 import ReceptionLogin from './clinic/pages/ReceptionLogin';
 
-
-import "./styles/global.css";
-import Dashboard from "./pages/dashboard";  // import your Dashboard component
-
 type ProtectedRouteProps = {
   children: React.ReactNode;
-  allowedRole: string; // or a union type like 'admin' | 'staff'
+  allowedRole: Role; // must match one of the roles defined
 };
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRole }) => { ;
-
-
-  // Get token and user info from localStorage
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRole }) => {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  // Check if authenticated and role matches
-  const isAuthorized = token && user?.role === roleMap[allowedRole];
-
-  if (!isAuthorized) {
-    // Redirect to login page of that role
+  // Check token presence and role match
+  if (!token || user?.role !== allowedRole) {
     return <Navigate to={`/${allowedRole}/login`} replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
-
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
-          {/* Home */}
+          {/* Home and Auth */}
           <Route index element={<Homepage />} />
-
-          {/* Authentication */}
           <Route path="pricing" element={<SubscriptionPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<Signup />} />
-
-          {/* Dashboard */}
           <Route path="dashboard" element={<Dashboard />} />
 
           {/* Features */}
@@ -105,34 +89,29 @@ const App = () => {
           <Route path="resources/docs" element={<Documentation />} />
           <Route path="community" element={<Community />} />
 
-          {/* clinic */}
- 
-          <Route path="/clinic" element={<Home />} />
-          <Route path="/clinic/token" element={<PatientToken />} />
-          <Route path="/clinic/doctor/login" element={<DoctorLogin />} />
-          <Route path="/clinic/reception/login" element={<ReceptionLogin />} />
+          {/* Clinic Routes */}
+          <Route path="clinic" element={<Home />} />
+          <Route path="clinic/token" element={<PatientToken />} />
+          <Route path="clinic/doctor/login" element={<DoctorLogin />} />
+          <Route path="clinic/reception/login" element={<ReceptionLogin />} />
 
-          {/* Protected Reception Dashboard */}
+          {/* Protected Clinic Dashboards */}
           <Route
-            path="/clinic/reception"
+            path="clinic/reception"
             element={
-              <ProtectedRoute allowedRole="reception">
+              <ProtectedRoute allowedRole="receptionist">
                 <ReceptionDashboard />
               </ProtectedRoute>
             }
           />
-
-          {/* Protected Doctor Dashboard */}
           <Route
-            path="/clinic/doctor"
+            path="clinic/doctor"
             element={
               <ProtectedRoute allowedRole="doctor">
                 <DoctorDashboard />
               </ProtectedRoute>
             }
           />
-
-
         </Route>
       </Routes>
     </Router>

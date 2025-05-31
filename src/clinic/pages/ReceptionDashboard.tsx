@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -28,7 +28,7 @@ import {
   StarBorder as StarBorderIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 
 const API_URL = 'https://token-api-0z44.onrender.com';
 
@@ -56,12 +56,9 @@ interface EditFormState {
 
 const ReceptionDashboard: React.FC = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editDialog, setEditDialog] = useState<EditDialogState>({
-    open: false,
-    token: null
-  });
+  const [editDialog, setEditDialog] = useState<EditDialogState>({ open: false, token: null });
   const [editForm, setEditForm] = useState<EditFormState>({
     patientName: '',
     phoneNumber: '',
@@ -70,23 +67,20 @@ const ReceptionDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    const socket = io(API_URL);
+    const socket: Socket = io(API_URL);
 
-    socket.on('tokenUpdate', () => {
-      fetchTokens();
-    });
+    const fetchOnEvent = () => fetchTokens();
 
-    socket.on('tokenDelete', () => {
-      fetchTokens();
-    });
-
-    socket.on('newToken', () => {
-      fetchTokens();
-    });
+    socket.on('tokenUpdate', fetchOnEvent);
+    socket.on('tokenDelete', fetchOnEvent);
+    socket.on('newToken', fetchOnEvent);
 
     fetchTokens();
 
     return () => {
+      socket.off('tokenUpdate', fetchOnEvent);
+      socket.off('tokenDelete', fetchOnEvent);
+      socket.off('newToken', fetchOnEvent);
       socket.disconnect();
     };
   }, []);
@@ -112,17 +106,11 @@ const ReceptionDashboard: React.FC = () => {
       isVIP: token.isVIP,
       notes: token.notes || ''
     });
-    setEditDialog({
-      open: true,
-      token
-    });
+    setEditDialog({ open: true, token });
   };
 
   const handleEditClose = () => {
-    setEditDialog({
-      open: false,
-      token: null
-    });
+    setEditDialog({ open: false, token: null });
   };
 
   const handleEditSubmit = async () => {
@@ -141,17 +129,16 @@ const ReceptionDashboard: React.FC = () => {
   };
 
   const handleDeleteToken = async (tokenId: string) => {
-    if (window.confirm('Are you sure you want to delete this token?')) {
-      setLoading(true);
-      try {
-        await axios.delete(`${API_URL}/api/tokens/${tokenId}`);
-        fetchTokens();
-        setError(null);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Error deleting token');
-      } finally {
-        setLoading(false);
-      }
+    if (!window.confirm('Are you sure you want to delete this token?')) return;
+    setLoading(true);
+    try {
+      await axios.delete(`${API_URL}/api/tokens/${tokenId}`);
+      fetchTokens();
+      setError(null);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error deleting token');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -177,11 +164,7 @@ const ReceptionDashboard: React.FC = () => {
         Reception Dashboard
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <TableContainer component={Paper}>
         <Table>
@@ -242,7 +225,6 @@ const ReceptionDashboard: React.FC = () => {
         </Table>
       </TableContainer>
 
-      {/* Edit Dialog */}
       <Dialog open={editDialog.open} onClose={handleEditClose}>
         <DialogTitle>Edit Token</DialogTitle>
         <DialogContent>
@@ -250,25 +232,19 @@ const ReceptionDashboard: React.FC = () => {
             <TextField
               label="Patient Name"
               value={editForm.patientName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEditForm({ ...editForm, patientName: e.target.value })
-              }
+              onChange={(e) => setEditForm({ ...editForm, patientName: e.target.value })}
               fullWidth
             />
             <TextField
               label="Phone Number"
               value={editForm.phoneNumber}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEditForm({ ...editForm, phoneNumber: e.target.value })
-              }
+              onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
               fullWidth
             />
             <TextField
               label="Notes"
               value={editForm.notes}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEditForm({ ...editForm, notes: e.target.value })
-              }
+              onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
               fullWidth
               multiline
               rows={3}
@@ -277,9 +253,7 @@ const ReceptionDashboard: React.FC = () => {
               control={
                 <Switch
                   checked={editForm.isVIP}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setEditForm({ ...editForm, isVIP: e.target.checked })
-                  }
+                  onChange={(e) => setEditForm({ ...editForm, isVIP: e.target.checked })}
                 />
               }
               label="VIP Patient"
@@ -288,12 +262,7 @@ const ReceptionDashboard: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditClose} disabled={loading}>Cancel</Button>
-          <Button
-            onClick={handleEditSubmit}
-            variant="contained"
-            color="primary"
-            disabled={loading}
-          >
+          <Button onClick={handleEditSubmit} variant="contained" color="primary" disabled={loading}>
             Save Changes
           </Button>
         </DialogActions>

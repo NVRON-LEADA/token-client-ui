@@ -14,6 +14,8 @@ const Layout = () => {
     "/clinic/doctor/login",
     "/clinic/reception/login",
     "/clinic/",
+    "/clinic/doctor",
+    "clinic/reception"
     ].includes(pathname);
   const hideNavBar2 = [
     "/pricing",

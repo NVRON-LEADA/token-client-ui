@@ -5,7 +5,6 @@ import {
   Paper,
   Button,
   Box,
-  Grid,          // Make sure this is imported from @mui/material
   Card,
   CardContent,
   CircularProgress,
@@ -48,24 +47,22 @@ const DoctorDashboard: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/login');
+      navigate('/clinic/doctor/login');
       return;
     }
 
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     const socket: Socket = io(API_URL, {
-      auth: {
-        token
-      }
+      auth: { token },
     });
 
     socket.on('queueUpdate', (data: any) => {
       fetchQueueStatus();
-      if (data.action === 'next') {
+      if (data.action === 'next' && data.currentToken) {
         setSnackbar({
           open: true,
-          message: `Now serving token #${data.currentToken.tokenNumber}`
+          message: `Now serving token #${data.currentToken.tokenNumber}`,
         });
       }
     });
@@ -83,10 +80,11 @@ const DoctorDashboard: React.FC = () => {
         `${API_URL}/api/queue/status`
       );
       setCurrentToken(response.data.currentToken);
-      setNextTokens(response.data.waitingTokens);
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        navigate('/login');
+      setNextTokens(Array.isArray(response.data.waitingTokens) ? response.data.waitingTokens : []);
+      setError(null);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        navigate('/clinic/doctor/login');
       } else {
         setError('Error fetching queue status');
       }
@@ -102,11 +100,11 @@ const DoctorDashboard: React.FC = () => {
         setSnackbar({ open: true, message: 'No more patients in queue' });
       }
       await fetchQueueStatus();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        navigate('/login');
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        navigate('/clinic/doctor/login');
       } else {
-        setError(error.response?.data?.message || 'Error moving to next patient');
+        setError(err.response?.data?.message || 'Error moving to next patient');
       }
     } finally {
       setLoading(false);
@@ -118,17 +116,17 @@ const DoctorDashboard: React.FC = () => {
       await axios.put(`${API_URL}/api/queue/skip/${tokenId}`);
       await fetchQueueStatus();
       setSnackbar({ open: true, message: 'Patient skipped' });
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        navigate('/login');
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        navigate('/clinic/doctor/login');
       } else {
-        setError(error.response?.data?.message || 'Error skipping token');
+        setError(err.response?.data?.message || 'Error skipping token');
       }
     }
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -137,62 +135,84 @@ const DoctorDashboard: React.FC = () => {
         Doctor Dashboard
       </Typography>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-      <Grid container spacing={isMobile ? 2 : 4}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: isMobile ? 2 : 3 }}>
-            <Typography variant="h5" gutterBottom sx={{ fontSize: isMobile ? '1.2rem' : '1.5rem' }}>
-              Current Patient
+      {/* Main Layout Box replacing outer Grid container */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? 2 : 4,
+        }}
+      >
+        {/* Current Patient Panel */}
+        <Paper sx={{ flex: 1, p: isMobile ? 2 : 3 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Patient
+          </Typography>
+          {currentToken ? (
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h3"
+                  color="primary"
+                  gutterBottom
+                  sx={{ fontSize: isMobile ? '2rem' : '3rem' }}
+                >
+                  Token #{currentToken.tokenNumber}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Patient: {currentToken.patientName}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Phone: {currentToken.phoneNumber}
+                </Typography>
+                {currentToken.isVIP && (
+                  <Typography color="secondary" variant="body1">
+                    VIP Patient
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Typography variant="body1" color="text.secondary">
+              No patient currently being served
             </Typography>
-            {currentToken ? (
-              <Card>
-                <CardContent>
-                  <Typography 
-                    variant="h3" 
-                    color="primary" 
-                    gutterBottom
-                    sx={{ fontSize: isMobile ? '2rem' : '3rem' }}
-                  >
-                    Token #{currentToken.tokenNumber}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Patient: {currentToken.patientName}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Phone: {currentToken.phoneNumber}
-                  </Typography>
-                  {currentToken.isVIP && (
-                    <Typography color="secondary" variant="body1">
-                      VIP Patient
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <Typography variant="body1" color="text.secondary">
-                No patient currently being served
-              </Typography>
-            )}
-          </Paper>
-        </Grid>
+          )}
+        </Paper>
 
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: isMobile ? 2 : 3 }}>
-            <Typography variant="h5" gutterBottom sx={{ fontSize: isMobile ? '1.2rem' : '1.5rem' }}>
-              Next Patients
-            </Typography>
-            <Grid container spacing={2}>
+        {/* Next Patients Panel */}
+        <Paper sx={{ flex: 1, p: isMobile ? 2 : 3 }}>
+          <Typography variant="h5" gutterBottom>
+            Next Patients
+          </Typography>
+
+          {Array.isArray(nextTokens) && nextTokens.length > 0 ? (
+            // Replace nested Grid container with Box flex wrap
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 2,
+              }}
+            >
               {nextTokens.map((token) => (
-                <Grid item xs={12} sm={6} key={token._id}>
-                  <Card>
+                <Box
+                  key={token._id}
+                  sx={{
+                    flexBasis: isMobile ? '100%' : 'calc(50% - 16px)',
+                    border: '1px solid #ddd',
+                    borderRadius: 1,
+                  }}
+                >
+                  <Card elevation={0} sx={{ boxShadow: 'none' }}>
                     <CardContent>
-                      <Typography variant="h6" sx={{ fontSize: isMobile ? '1.1rem' : '1.25rem' }}>
-                        Token #{token.tokenNumber}
-                      </Typography>
-                      <Typography variant="body2">
-                        {token.patientName}
-                      </Typography>
+                      <Typography variant="h6">Token #{token.tokenNumber}</Typography>
+                      <Typography variant="body2">{token.patientName}</Typography>
                       {token.isVIP && (
                         <Typography color="secondary" variant="caption">
                           VIP
@@ -200,50 +220,49 @@ const DoctorDashboard: React.FC = () => {
                       )}
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
               ))}
-              {nextTokens.length === 0 && (
-                <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary">
-                    No patients waiting
-                  </Typography>
-                </Grid>
-              )}
-            </Grid>
-          </Paper>
-        </Grid>
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No patients waiting
+            </Typography>
+          )}
+        </Paper>
+      </Box>
 
-        <Grid item xs={12}>
-          <Box sx={{ 
-            display: 'flex', 
-            gap: 2, 
-            justifyContent: 'center',
-            flexDirection: isMobile ? 'column' : 'row'
-          }}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              onClick={handleNextPatient}
-              disabled={loading || nextTokens.length === 0}
-              fullWidth={isMobile}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Next Patient'}
-            </Button>
-            {currentToken && (
-              <Button
-                variant="outlined"
-                color="secondary"
-                size="large"
-                onClick={() => handleSkipToken(currentToken._id)}
-                fullWidth={isMobile}
-              >
-                Skip Current Patient
-              </Button>
-            )}
-          </Box>
-        </Grid>
-      </Grid>
+      {/* Buttons Section */}
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+          justifyContent: 'center',
+          flexDirection: isMobile ? 'column' : 'row',
+          mt: 4,
+        }}
+      >
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={handleNextPatient}
+          disabled={loading || nextTokens.length === 0}
+          fullWidth={isMobile}
+        >
+          {loading ? <CircularProgress size={24} /> : 'Next Patient'}
+        </Button>
+        {currentToken && (
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="large"
+            onClick={() => handleSkipToken(currentToken._id)}
+            fullWidth={isMobile}
+          >
+            Skip Current Patient
+          </Button>
+        )}
+      </Box>
 
       <Snackbar
         open={snackbar.open}
