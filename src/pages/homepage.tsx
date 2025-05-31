@@ -2,7 +2,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans">
       {/* Hero Section */}
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 sm:px-10 lg:px-32 bg-gradient-to-br from-purple-900 via-black to-black">
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 sm:px-10 lg:px-32 bg-gradient-to-br from-purple-950 via-black to-black">
         <h1 className="text-5xl font-bold mb-4">Welcome to LEADA Clinic Portal</h1>
         <p className="text-gray-300 text-lg max-w-2xl mx-auto">
           Simplify patient flow and improve clinic efficiency with our AI-powered token management system.
@@ -43,7 +43,7 @@ const HomePage = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 px-6 sm:px-10 lg:px-32 bg-gradient-to-r from-black via-purple-800 to-black text-center">
+      <div className="py-20 px-6 sm:px-10 lg:px-32 bg-gradient-to-r from-black via-purple-950 to-black text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Clinic?</h2>
         <p className="text-gray-300 mb-6">
           Join LEADA and experience seamless token-based management today.

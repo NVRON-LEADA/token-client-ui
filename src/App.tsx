@@ -7,6 +7,10 @@ import Signup from "./pages/signup";
 import Homepage from "./pages/homepage";
 import "./styles/global.css";
 
+import { ThemeProvider, createTheme } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+
+
 
 // Feature pages
 import FeaturesLanding from "./pages/FeaturesLanding";
@@ -29,8 +33,37 @@ import HelpCenter from "./pages/resources/HelpCenter";
 import Documentation from "./pages/resources/Documentation";
 import Community from "./pages/resources/Community";
 
+//Clinic pages
+import Home from './clinic/pages/Home';
+import PatientToken from './clinic/pages/PatientToken';
+import DoctorDashboard from './clinic/pages/DoctorDashboard';
+import ReceptionDashboard from './clinic/pages/ReceptionDashboard';
+import DoctorLogin from './clinic/pages/Login';
+import ReceptionLogin from './clinic/pages/ReceptionLogin';
+import { SubdomainProvider } from './clinic/contexts/SubdomainContext';
+
+
+
 import "./styles/global.css";
 import Dashboard from "./pages/dashboard";  // import your Dashboard component
+
+
+const ProtectedRoute = ({ children, allowedRole }) => {
+  // Get token and user info from localStorage
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Check if authenticated and role matches
+  const isAuthorized = token && user?.role === roleMap[allowedRole];
+
+  if (!isAuthorized) {
+    // Redirect to login page of that role
+    return <Navigate to={`/${allowedRole}/login`} replace />;
+  }
+
+  return children;
+};
+
 
 const App = () => {
   return (
@@ -69,8 +102,34 @@ const App = () => {
           <Route path="resources/docs" element={<Documentation />} />
           <Route path="community" element={<Community />} />
 
-          {/* clinics
-          <Route path="Home" element={<Home />} /> */}
+          {/* clinic */}
+ 
+          <Route path="/clinic" element={<Home />} />
+          <Route path="/clinic/token" element={<PatientToken />} />
+          <Route path="/clinic/doctor/login" element={<DoctorLogin />} />
+          <Route path="/clinic/reception/login" element={<ReceptionLogin />} />
+
+          {/* Protected Reception Dashboard */}
+          <Route
+            path="/clinic/reception"
+            element={
+              <ProtectedRoute allowedRole="reception">
+                <ReceptionDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Doctor Dashboard */}
+          <Route
+            path="/clinic/doctor"
+            element={
+              <ProtectedRoute allowedRole="doctor">
+                <DoctorDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+
         </Route>
       </Routes>
     </Router>
